@@ -28,7 +28,7 @@ def process(files, out):
     sequence_string = ' '.join(["-delay %s %s" % (max(delay, 1000), filename) for delay, filename in zip(progression_delay*100, progression_files)])
     command = "convert %s -loop 0 %s" % (sequence_string, out)
     print command
-    subprocess.Popen(command)
+    subprocess.Popen(command, shell=True)
 
 def main():
     usage="python %prog [options] files"
