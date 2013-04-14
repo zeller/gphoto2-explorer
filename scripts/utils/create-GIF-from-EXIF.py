@@ -26,11 +26,11 @@ def process(files, out):
     print repr(progression_delay)
 
     for filename in progression_files:
-        subprocess.Popen(["convert", "-resize 200x", filename, filename + ".small"])
+        subprocess.Popen(["convert", "-resize 200x " + filename + " " + filename + ".small"])
 
-    file_arguments = ["-delay %s %s" % (max(delay*10, 100), filename + ".small") for delay, filename in zip(progression_delay, progression_files)]
+    file_arguments = ' '.join(["-delay %s %s" % (max(delay*10, 100), filename + ".small") for delay, filename in zip(progression_delay, progression_files)])
 
-    subprocess.Popen(["convert"] + file_arguments + ["-loop 0", out])
+    subprocess.Popen(["convert", file_arguments + " -loop 0 " + out])
 
 def main():
     usage="python %prog [options] files"
