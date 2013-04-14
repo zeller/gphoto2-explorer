@@ -20,17 +20,30 @@ def process(files, out):
     # sort the images on timestamp and calculate seconds delay between photos
     progression = sorted(photos_datetime_map.iteritems(), key=lambda x: x[1], reverse=False)
     progression_files = [progression[i][0] for i in range(len(progression))]
-    progression_delay = [(progression[i+1][1]-progression[i][1]).seconds for i in range(len(progression)-1)] + [3]
+    progression_delay = [(progression[i+1][1]-progression[i][1]).seconds for i in range(len(progression)-1)] + [10]
 
     print repr(progression_files)
     print repr(progression_delay)
 
+    def get_thumbfile(filename):
+        dirname = os.path.dirname(filename)
+        basepath, extension = os.path.splitext(filename)
+        basename = os.path.basename(basepath)
+        thumbname = basename + '.thumb' + extension
+        dirname = os.path.join(dirname, "thumbs")
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        thumbfile = os.path.join(dirname, thumbname)
+        return thumbfile
+
     for filename in progression_files:
-        subprocess.Popen(["convert", "-resize 200x " + filename + " " + filename + ".small"])
+        sp = subprocess.Popen("convert -resize 200x " + filename + " " + get_thumbfile(filename), shell=True)
+        sp.wait()
 
-    file_arguments = ' '.join(["-delay %s %s" % (max(delay*10, 100), filename + ".small") for delay, filename in zip(progression_delay, progression_files)])
+    file_arguments = ' '.join(["-delay %s %s" % (min(delay*10, 100), get_thumbfile(filename)) for delay, filename in zip(progression_delay, progression_files)])
 
-    subprocess.Popen(["convert", file_arguments + " -loop 0 " + out])
+    sp = subprocess.Popen("convert " + file_arguments + " -loop 0 " + out, shell=True)
+    sp.wait()
 
 def main():
     usage="python %prog [options] files"
